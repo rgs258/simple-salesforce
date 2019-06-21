@@ -15,9 +15,11 @@ try:
     from html import escape
 except ImportError:
     from cgi import escape
+import logging
 import requests
 import warnings
 
+logger = logging.getLogger(__name__)
 
 # pylint: disable=invalid-name,too-many-arguments,too-many-locals
 def SalesforceLogin(
@@ -168,11 +170,19 @@ def SalesforceLogin(
         proxies=proxies)
 
     if response.status_code != 200:
-        except_code = getUniqueElementValueFromXmlString(
-            response.content, 'sf:exceptionCode')
-        except_msg = getUniqueElementValueFromXmlString(
-            response.content, 'sf:exceptionMessage')
-        raise SalesforceAuthenticationFailed(except_code, except_msg)
+        try:
+            except_code = getUniqueElementValueFromXmlString(
+                response.content, 'sf:exceptionCode')
+            except_msg = getUniqueElementValueFromXmlString(
+                response.content, 'sf:exceptionMessage')
+        except ExpatError as e:
+            logger.warning(
+                'During login, salesforce responded with a non-XML response',
+                exc_info=True)
+            except_code = 'ResponseNotXML'
+            except_msg = response.content
+        finally:
+            raise SalesforceAuthenticationFailed(except_code, except_msg)
 
     session_id = getUniqueElementValueFromXmlString(
         response.content, 'sessionId')
