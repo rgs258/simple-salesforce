@@ -181,8 +181,7 @@ def SalesforceLogin(
                 exc_info=True)
             except_code = 'ResponseNotXML'
             except_msg = response.content
-        finally:
-            raise SalesforceAuthenticationFailed(except_code, except_msg)
+        raise SalesforceAuthenticationFailed(except_code, except_msg)
 
     session_id = getUniqueElementValueFromXmlString(
         response.content, 'sessionId')
