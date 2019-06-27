@@ -2,14 +2,13 @@
 
 Heavily Modified from RestForce 1.0.0
 """
+from pyexpat import ExpatError
 
 DEFAULT_CLIENT_ID_PREFIX = 'RestForce'
-
 
 from simple_salesforce.api import DEFAULT_API_VERSION
 from simple_salesforce.util import getUniqueElementValueFromXmlString
 from simple_salesforce.exceptions import SalesforceAuthenticationFailed
-from pyexpat import ExpatError
 
 try:
     # Python 3+
@@ -21,6 +20,7 @@ import requests
 import warnings
 
 logger = logging.getLogger(__name__)
+
 
 # pylint: disable=invalid-name,too-many-arguments,too-many-locals
 def SalesforceLogin(
@@ -182,7 +182,7 @@ def SalesforceLogin(
                 exc_info=True)
             except_code = 'ResponseNotXML'
             except_msg = response.content
-        raise SalesforceAuthenticationFailed(except_code, exceptExpatError_msg)
+        raise SalesforceAuthenticationFailed(except_code, except_msg)
 
     session_id = getUniqueElementValueFromXmlString(
         response.content, 'sessionId')
